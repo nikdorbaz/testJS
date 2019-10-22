@@ -2,7 +2,7 @@
 
 `Test work for treolabs`
 
-Users with access:
+Users with access: /
 `login`: `John`
 `password` : `123123123`
 
