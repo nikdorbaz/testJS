@@ -1,0 +1,238 @@
+*{
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background: #94f1fb;
+}
+
+input{
+    padding: 10px 15px;
+    border: 1px solid #c3c3c3;
+}
+
+button{
+    padding: 10px 15px;
+    background: #94f1fb;
+    border: 1px solid #4ebfcc;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+button:hover{
+    color: #ffffff;
+    background: #4ebfcc;
+}
+
+header{
+    height: 10vh;
+    padding: 10px;
+    background: #4ebfcc;
+}
+
+header .container{
+    max-width: 1170px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    margin: auto;
+    position: relative;
+}
+
+header a,
+header img{
+    height: 100%;
+}
+
+#login{
+    display: none;
+}
+
+#app{
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 50px 25px;
+    max-width: 1170px;
+    margin: auto;
+}
+
+.pagination{
+    width: 25px;
+    cursor: pointer;
+}
+
+.pagination.active{
+    font-weight: 600;
+}
+
+#cart img{
+    height: 80px;
+}
+
+#cart #badge{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: #fff;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+}
+
+.product{
+    width: calc(100% / 3 - 40px);
+    text-align: center;
+    margin: 20px;
+    background: #ffffff;
+}
+
+.product img{
+    width: 100%;
+}
+
+.product .product-title,
+.product .product-price{
+    line-height: 2rem;
+}
+
+.product .product-desc{
+    min-height: 3rem;
+}
+
+.product-page{
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    align-self: baseline;
+    width: 100%;
+}
+
+.product-page .product-info{
+    padding: 15px;
+    width: 50%;
+    align-self: stretch;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.product-page img{
+    width: 50%;
+}
+
+.controls{
+    width: 100%;
+    display: flex;
+}
+
+.controls .filters,
+.controls .sort{
+    width: 50%;
+    position: relative;
+}
+
+.controls .filter{
+    position: absolute;
+    width: 80%;
+    height: 30px;
+    right: 0;
+    top: 0;
+}
+
+.controls .filter:after{
+    content: '';
+    display: block;
+    width: 96%;
+    height: 10px;
+    position: absolute;
+    background: #ffffff;
+    z-index: -1;
+    top: 10px;
+    left: 2%;
+}
+
+.filter div {
+    background: #4ebfcc;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    position: absolute;
+    transform: translateY(-50%);
+    top: 50%;
+    cursor: pointer;
+}
+
+.filter .maxprice{
+    right: 0;
+}
+
+.filter input{
+    background: transparent;
+    border: 0;
+    padding: 0;
+    width: 50px;
+    position: absolute;
+    top: -15px;
+    transform: translateX(-50%);
+    left: 50%;
+    text-align: center;
+}
+
+#cart-popup{
+    position: absolute;
+    right: 0;
+    background: #fff;
+    padding: 15px;
+}
+
+.cart-product{
+    position: relative;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid;
+    margin-bottom: 10px;
+}
+
+.cart-product img{
+    display: block;
+    margin-bottom: 10px;
+}
+
+.cart-product button{
+    position: absolute;
+    right: -15px;
+    top: -10px;
+    padding: 5px;
+    background: transparent;
+    border: 0;
+}
+
+.cart-product button:hover{
+    color: #000;
+}
+
+#viewed {
+    position: absolute;
+    right: 0;
+    top: 10vh;
+    padding: 15px;
+    width: 200px;
+}
+
+#viewed:before{
+    content: 'Viewed Products';
+}
+
+#viewed .product{
+    width: 100%;
+    margin: 20px 0;
+}
