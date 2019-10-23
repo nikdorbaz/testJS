@@ -2,11 +2,9 @@
 
 class App {
 
-  _uri = 'https://private-cc9db-shop75.apiary-mock.com/products';
   _appEl = document.getElementById('app');
   _cartEl = document.getElementById('cart');
   _badgeEl = document.getElementById('badge');
-  _pages = ['Product', 'Cart'];
   _xhr = false;
   viewedProducts = [];
   products = [];
@@ -16,22 +14,17 @@ class App {
     let me = this;
 
     if (localStorage.length) {
-
       me.render();
-
     } else {
-
-      me.user = user;
-      me.setStorage('user', user);
-
+      me.setStorage('user', user.username);
       me.getProducts();
+
       let productsRespone = setInterval(function () {
         if (me._xhr) {
-          me.renderProducts(1);
+          me.renderProducts();
           clearInterval(productsRespone);
         }
       }, 200);
-
     }
 
     me._cartEl.addEventListener('click', me.renderCart);
@@ -41,41 +34,13 @@ class App {
     let me = this,
       page = window.location.search;
 
-    me.user = me.getStorage('user');
     me.products = me.getStorage('products');
     me.cart = me.getStorage('cart');
     me.viewedProducts = me.getStorage('viewed');
 
-    if (me.cart.length) {
-      me.renderMiniCart();
-    }
-
-    if ( me.viewedProducts.length ){
-      me.renderViewed();
-    }
-
-    if (page) {
-
-      this._pages.forEach(function (el) {
-        let pageUrl = el.toLowerCase();
-
-        if (page.indexOf(pageUrl) >= 0) {
-
-          let pageInfo = {
-            'link': pageUrl,
-            'id': new URL(location.href).searchParams.get(pageUrl)
-          };
-
-          me.setStorage('page', pageInfo);
-          me['render' + el]();
-        }
-
-      });
-
-    } else {
-      me.removeStorage('page');
-      me.renderProducts(1);
-    }
+    (me.cart.length) ? me.renderMiniCart() : '';
+    (me.viewedProducts.length) ? me.renderViewed() : '';
+    (page) ? me.renderProduct() : me.renderProducts();
 
   }
 
@@ -83,7 +48,7 @@ class App {
     let me = this,
       request = new XMLHttpRequest();
 
-    request.open('GET', me._uri);
+    request.open('GET', 'https://private-cc9db-shop75.apiary-mock.com/products');
 
     request.onreadystatechange = function () {
       if (this.readyState === 4) {
@@ -108,7 +73,7 @@ class App {
       totalPage = me.products.length / itemsPerPage;
 
     me._appEl.innerHTML = '';
-
+    page = (page) ? page : 1;
     me.renderControls();
 
     for (let i = itemsPerPage * (page - 1); i < itemsPerPage * page; i++) {
@@ -125,17 +90,13 @@ class App {
 
       me._appEl.innerHTML += productTemplate;
     }
-
     for (let i = 1; i <= totalPage; i++) {
-      let paginationTemplate = `<span class="pagination" onclick="app.renderProducts(${i})"> ${i} </span>`;
-
-      if (i == page) {
-        paginationTemplate = `<span class="pagination active" onclick="app.renderProducts(${i})"> ${i} </span>`;
-      }
+      let paginationTemplate = (i == page) ?
+        `<span class="pagination active" onclick="app.renderProducts(${i})"> ${i} </span>` :
+        `<span class="pagination" onclick="app.renderProducts(${i})"> ${i} </span>`;
 
       me._appEl.innerHTML += paginationTemplate;
     }
-
   }
 
   goToProduct(prodId) {
@@ -145,40 +106,21 @@ class App {
       location = location.substr(0, location.indexOf('?'));
     }
 
+    this.setStorage('page', { id: prodId });
     window.location.href = location + `?product=${prodId}`;
   }
 
   renderControls() {
     let me = this,
-      sorts = ['title', 'price'],
-      sort = '';
+      sorts = ['default', 'title', 'price'],
+      sort = '<select onchange="app.sortProducts(this.value)">';
 
-    me.minPrice = Math.min.apply(null, me.products.map(function (el) {
-      return el.price;
-    }));
-    me.maxPrice = Math.max.apply(null, me.products.map(function (el) {
-      return el.price;
-    }));
+    for (let i = 0; i < sorts.length; i++) {
+      sort += (me.getStorage('sort') == sorts[i]) ?
+        `<option value="${sorts[i]}" selected>${sorts[i]}</option>` :
+        `<option value="${sorts[i]}">${sorts[i]}</option>`;
 
-
-    for (let i = sorts.length; i >= 0; i--) {
-
-      if (i === sorts.length) {
-        sort += `<select onchange="app.sortProducts(this.value)">
-                  <option value="">default</option>`;
-        continue;
-      }
-
-      if (me.getStorage('sort') == sorts[i]) {
-        sort += `<option value="${sorts[i]}" selected>${sorts[i]}</option>`;
-      } else {
-        sort += `<option value="${sorts[i]}">${sorts[i]}</option>`;
-      }
-
-      if (i === 0) {
-        sort += `</select>`;
-      }
-
+      sort += (i === sorts.length) ? `</select>` : '';
     }
 
     let controlsMarkup = `
@@ -191,39 +133,34 @@ class App {
     `;
 
     me._appEl.innerHTML += controlsMarkup;
-
   }
 
   renderProduct() {
     let me = this,
       prodId = me.getStorage('page').id;
 
+    if (me.viewedProducts.indexOf(prodId) < 0) {
+      me.viewedProducts.push(prodId)
+      me.setStorage('viewed', me.viewedProducts);
+    }
+
     me.products.forEach(function (el) {
 
-      if (el.id == prodId) {
+      if (el.id != prodId) { return }
 
-        if ( me.viewedProducts.indexOf(el.id) < 0 ){
-          me.viewedProducts.push(el.id);
-          me.setStorage('viewed', me.viewedProducts);
-        }
-
-        let prodTemplate = `
-          <div class="product-page">
-            <img src="${el.image}" alt="${el.title}">
-            <div class="product-info">
-              <h2>${el.title}</h2>
-              <div class="product-desc">${el.description}</div>
-              <div class="product-price">Price ${el.price}</div>
-              
+      let productTemplate = `
+        <div class="product-page">
+          <img src="${el.image}" alt="${el.title}">
+          <div class="product-info">
+            <h2>${el.title}</h2>
+            <div class="product-desc">${el.description}</div>
+            <div class="product-price">Price ${el.price}</div>
             <button onclick="app.addToCart(${el.id})">Buy</button>
-            </div>
           </div>
-        `;
+        </div>
+      `;
 
-        me._appEl.innerHTML += prodTemplate;
-        return;
-
-      }
+      me._appEl.innerHTML += productTemplate;
 
     });
 
@@ -234,7 +171,7 @@ class App {
       viewed = document.getElementById('viewed');
 
     viewed.innerHTML = '';
-    me.viewedProducts.forEach(function(el){
+    me.viewedProducts.forEach(function (el) {
       let product = me.getProduct(el);
       viewed.innerHTML += `
         <div class="product">
@@ -246,23 +183,17 @@ class App {
   }
 
   getProduct(prodId) {
-
-    let product = this.products.filter(function(el, i){
-
-      if ( el.id === prodId ){
+    let product = this.products.filter(function (el, i) {
+      if (el.id === prodId) {
         return el;
       }
-
       return;
-
     });
 
     return product[0];
-
   }
 
   addToCart(prodId) {
-
     let cartIndex = false,
       cartItem = {
         'id': prodId,
@@ -299,7 +230,7 @@ class App {
   removeFromCart(prodId) {
     let me = this;
 
-    me.cart.forEach(function(el,i) {
+    me.cart.forEach(function (el, i) {
 
       if (el.id === prodId) {
         me.cart.splice(i, 1);
@@ -316,7 +247,7 @@ class App {
       el = this,
       cartWrapper = document.getElementById('cart-popup');
 
-    if ( !cartWrapper ){
+    if (!cartWrapper) {
       cartWrapper = document.createElement('div');
       cartWrapper.setAttribute('id', 'cart-popup');
       el.append(cartWrapper);
@@ -324,11 +255,11 @@ class App {
 
     cartWrapper.innerHTML = '';
 
-    if ( !me.cart.length ){
+    if (!me.cart.length) {
       cartWrapper.remove();
     }
 
-    me.cart.forEach(function(el){
+    me.cart.forEach(function (el) {
       let product = me.getProduct(el.id);
 
       let cartProductTemplate = `
@@ -344,7 +275,6 @@ class App {
   }
 
   renderMiniCart() {
-
     let countProducts = 0;
 
     this.cart.forEach(function (el) {
@@ -352,11 +282,9 @@ class App {
     });
 
     this._badgeEl.innerHTML = countProducts;
-
   }
 
   sortProducts(type) {
-
     this.products.sort(function (a, b) {
       if (a[type] < b[type]) {
         return -1;
@@ -368,8 +296,7 @@ class App {
     });
 
     this.setStorage('sort', type);
-    this.renderProducts(1);
-
+    this.renderProducts();
   }
 
   setStorage(name, item) {
